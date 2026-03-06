@@ -135,6 +135,7 @@ export interface SourceFacts {
   candidateHours: RestaurantHour[];
   candidateCuisine?: string;
   candidatePriceRange?: string;
+  candidateMenu: MenuTab[];
   candidateImages: SourceImageOption[];
   candidateLinks: SourceLinkOption[];
 }

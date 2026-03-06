@@ -140,7 +140,104 @@ type ExtractedPage = {
   candidateHours: RestaurantHour[];
   candidateCuisine?: string;
   candidatePriceRange?: string;
+  candidateMenu: MenuTab[];
 };
+
+const MENU_HEADING_BLOCKLIST = new Set([
+  "menu",
+  "dinner menu",
+  "lunch menu",
+  "brunch menu",
+  "drinks menu",
+  "dessert menu",
+  "wine list",
+  "cocktail list",
+  "hours",
+  "contact",
+  "reservations",
+  "gallery",
+]);
+
+const TOKEN_BLOCKLIST = new Set([
+  "and",
+  "the",
+  "with",
+  "for",
+  "from",
+  "our",
+  "your",
+  "dish",
+  "plate",
+  "restaurant",
+  "menu",
+]);
+
+const CURATED_DISH_IMAGE_MATCHERS: Array<{
+  keywords: string[];
+  src: string;
+  alt: string;
+}> = [
+  {
+    keywords: ["steak", "porterhouse", "ribeye", "filet", "chop", "prime rib"],
+    src: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80",
+    alt: "Seared steak plated in a restaurant dining room",
+  },
+  {
+    keywords: ["lobster", "shrimp", "prawn", "scampi"],
+    src: "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=1200&q=80",
+    alt: "Seafood dish with lobster and shellfish",
+  },
+  {
+    keywords: ["oyster", "clam", "mussel", "raw bar"],
+    src: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=1200&q=80",
+    alt: "Fresh oysters served on ice",
+  },
+  {
+    keywords: ["salmon", "branzino", "snapper", "fish", "tuna", "sea bass"],
+    src: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1200&q=80",
+    alt: "Fresh fish entree plated with herbs",
+  },
+  {
+    keywords: ["sushi", "sashimi", "roll", "nigiri"],
+    src: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1200&q=80",
+    alt: "Assorted sushi served on a dark plate",
+  },
+  {
+    keywords: ["salad", "caesar", "greens", "caprese"],
+    src: "https://images.unsplash.com/photo-1546793665-c74683f339c1?auto=format&fit=crop&w=1200&q=80",
+    alt: "Fresh composed salad in a shallow bowl",
+  },
+  {
+    keywords: ["pasta", "gnocchi", "risotto"],
+    src: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=1200&q=80",
+    alt: "Restaurant pasta dish with sauce and herbs",
+  },
+  {
+    keywords: ["chicken", "duck", "turkey"],
+    src: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1200&q=80",
+    alt: "Roasted poultry entree plated for dinner service",
+  },
+  {
+    keywords: ["burger", "sandwich", "sliders"],
+    src: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1200&q=80",
+    alt: "Restaurant burger served on a plate",
+  },
+  {
+    keywords: ["dessert", "cake", "pie", "tart", "sundae", "ice cream"],
+    src: "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=1200&q=80",
+    alt: "Dessert course plated with cream and garnish",
+  },
+  {
+    keywords: ["cocktail", "martini", "mojito", "spritz", "wine"],
+    src: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1200&q=80",
+    alt: "Craft cocktail served in a restaurant bar",
+  },
+  {
+    keywords: ["ceviche", "crudo", "tartare"],
+    src: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=1200&q=80",
+    alt: "Citrus seafood appetizer plated for service",
+  },
+];
 
 function stripHtml(value: string) {
   return value
@@ -157,6 +254,220 @@ function cleanText(value: string | undefined | null) {
   if (!value) return undefined;
   const normalized = stripHtml(value).trim();
   return normalized || undefined;
+}
+
+function tokenizeForMatching(value: string | undefined | null) {
+  return (value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]+/g, " ")
+    .split(/\s+/)
+    .filter((token) => token.length > 2 && !TOKEN_BLOCKLIST.has(token));
+}
+
+function uniqueTokens(...values: Array<string | undefined | null>) {
+  return [...new Set(values.flatMap((value) => tokenizeForMatching(value)))];
+}
+
+function inferMenuTabName(
+  kind: InternalPageKind,
+  title?: string,
+  firstHeading?: string,
+  url?: string
+) {
+  const candidates = [firstHeading, title, url]
+    .filter(Boolean)
+    .map((value) => value!.toLowerCase());
+
+  if (candidates.some((value) => value.includes("lunch"))) return "Lunch";
+  if (candidates.some((value) => value.includes("brunch"))) return "Brunch";
+  if (candidates.some((value) => value.includes("dessert"))) return "Dessert";
+  if (candidates.some((value) => value.includes("drink"))) return "Drinks";
+  if (candidates.some((value) => value.includes("wine"))) return "Wine";
+  if (candidates.some((value) => value.includes("cocktail"))) return "Cocktails";
+  if (kind === "menu") return "Menu";
+  return "Highlights";
+}
+
+function looksLikeMenuHeading(value: string) {
+  const normalized = value.toLowerCase().trim();
+  if (!normalized || MENU_HEADING_BLOCKLIST.has(normalized)) return false;
+  if (normalized.length > 60) return false;
+  return true;
+}
+
+function parseMenuPrice(value: string) {
+  const matches = [...value.matchAll(/\$?\d{2,3}(?:\.\d{2})?/g)];
+  const last = matches.at(-1)?.[0];
+  if (!last) return null;
+
+  const price = Number(last.replace(/^\$/, ""));
+  return Number.isFinite(price) ? price : null;
+}
+
+function normalizeDescriptionText(value: string) {
+  return value
+    .replace(/\s+/g, " ")
+    .replace(/\s+\./g, ".")
+    .trim();
+}
+
+function parseMenuItemLine(value: string) {
+  const text = cleanText(value);
+  if (!text || text.length < 5 || text.length > 220) return null;
+
+  const price = parseMenuPrice(text);
+  if (price === null) return null;
+
+  const priceMatch = [...text.matchAll(/\$?\d{2,3}(?:\.\d{2})?/g)].at(-1);
+  if (!priceMatch || typeof priceMatch.index !== "number") return null;
+
+  const beforePrice = text.slice(0, priceMatch.index).trim();
+  if (!beforePrice || beforePrice.length < 3) return null;
+
+  const normalizedBeforePrice = beforePrice
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+\($/, "(")
+    .trim();
+
+  const split = normalizedBeforePrice.match(
+    /^([A-Z0-9&'’\-/().,\s]{3,}?)(?:\s{2,}|\s+-\s+|:\s+)(.+)$/
+  );
+
+  const rawName = split?.[1] || normalizedBeforePrice;
+  const rawDescription = split?.[2];
+  const name = normalizeDescriptionText(rawName)
+    .replace(/\s+\(([^)]+)\)\s*$/, " ($1)")
+    .trim();
+
+  if (name.length < 3 || name.length > 120) return null;
+
+  return {
+    name,
+    description: rawDescription ? normalizeDescriptionText(rawDescription) : "",
+    price,
+  };
+}
+
+function appendDescriptionToLastItem(
+  categories: MenuTab["categories"],
+  value: string
+) {
+  const category = categories.at(-1);
+  const item = category?.items.at(-1);
+  const text = cleanText(value);
+  if (!item || !text) return false;
+  if (text.length < 8 || text.length > 220) return false;
+  if (parseMenuPrice(text) !== null) return false;
+  if (/^(menu|hours|reservations|contact)$/i.test(text)) return false;
+
+  item.description = item.description
+    ? `${item.description} ${normalizeDescriptionText(text)}`
+    : normalizeDescriptionText(text);
+  return true;
+}
+
+function extractStructuredMenu(
+  $: ReturnType<typeof load>,
+  kind: InternalPageKind,
+  title?: string,
+  firstHeading?: string,
+  url?: string
+) {
+  const tabName = inferMenuTabName(kind, title, firstHeading, url);
+  const tab: MenuTab = {
+    id: `tab-${sanitizeId(tabName, "menu")}`,
+    name: tabName,
+    categories: [],
+  };
+
+  const headings = $("h2, h3, h4").toArray();
+  for (const heading of headings) {
+    const headingText = cleanText($(heading).text());
+    if (!headingText || !looksLikeMenuHeading(headingText)) continue;
+
+    const category = {
+      id: `category-${sanitizeId(headingText, String(tab.categories.length + 1))}`,
+      name: headingText,
+      items: [] as MenuTab["categories"][number]["items"],
+    };
+
+    let node = $(heading).next();
+    while (node.length > 0) {
+      const tagName = node.get(0)?.tagName?.toLowerCase();
+      if (tagName && /^h[1-4]$/.test(tagName)) break;
+
+      if (tagName === "ul" || tagName === "ol") {
+        node.find("li").each((_, element) => {
+          const parsed = parseMenuItemLine($(element).text());
+          if (parsed) {
+            category.items.push({
+              id: `item-${sanitizeId(parsed.name, String(category.items.length + 1))}`,
+              name: parsed.name,
+              description: parsed.description,
+              price: parsed.price,
+            });
+          } else {
+            appendDescriptionToLastItem([category], $(element).text());
+          }
+        });
+      } else {
+        const parsed = parseMenuItemLine(node.text());
+        if (parsed) {
+          category.items.push({
+            id: `item-${sanitizeId(parsed.name, String(category.items.length + 1))}`,
+            name: parsed.name,
+            description: parsed.description,
+            price: parsed.price,
+          });
+        } else {
+          appendDescriptionToLastItem([category], node.text());
+        }
+      }
+
+      node = node.next();
+    }
+
+    if (category.items.length > 0) {
+      tab.categories.push(category);
+    }
+  }
+
+  if (tab.categories.length > 0) {
+    return [tab];
+  }
+
+  if (kind !== "menu") {
+    return [];
+  }
+
+  const fallbackItems = $("li, p, div")
+    .map((_, element) => parseMenuItemLine($(element).text()))
+    .get()
+    .filter(Boolean)
+    .slice(0, 18) as Array<{ name: string; description: string; price: number }>;
+
+  if (fallbackItems.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      id: `tab-${sanitizeId(tabName, "menu")}`,
+      name: tabName,
+      categories: [
+        {
+          id: "category-featured",
+          name: "Featured",
+          items: fallbackItems.map((item, index) => ({
+            id: `item-${sanitizeId(item.name, String(index + 1))}`,
+            name: item.name,
+            description: item.description,
+            price: item.price,
+          })),
+        },
+      ],
+    },
+  ];
 }
 
 function dedupeStrings(values: Array<string | undefined>, limit: number) {
@@ -229,7 +540,10 @@ function isBlockedHostname(hostname: string) {
 }
 
 export async function validatePublicUrl(rawUrl: string) {
-  const url = new URL(rawUrl);
+  const normalizedUrl = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(rawUrl.trim())
+    ? rawUrl.trim()
+    : `https://${rawUrl.trim()}`;
+  const url = new URL(normalizedUrl);
 
   if (!["http:", "https:"].includes(url.protocol)) {
     throw new Error("Only http and https URLs are supported.");
@@ -577,6 +891,13 @@ function extractPage(baseUrl: URL, html: string, kind: InternalPageKind): Extrac
         (restaurantEntity as Record<string, unknown>).openingHoursSpecification
       )
     : extractHoursFromText(bodyText);
+  const candidateMenu = extractStructuredMenu(
+    $,
+    kind,
+    title,
+    firstHeading,
+    baseUrl.toString()
+  );
 
   return {
     page: {
@@ -640,6 +961,7 @@ function extractPage(baseUrl: URL, html: string, kind: InternalPageKind): Extrac
       cleanText(
         (restaurantEntity as Record<string, unknown> | undefined)?.priceRange as string
       ) || cleanText(bodyText.match(/\${1,4}/)?.[0]),
+    candidateMenu,
   };
 }
 
@@ -666,6 +988,160 @@ function scoreLink(link: SourceLinkOption, kind: InternalPageKind) {
   if (pathname.includes(kind)) score += 2;
   if (pathname.split("/").length <= 3) score += 1;
   return score;
+}
+
+function countMenuItems(menu: MenuTab[]) {
+  return menu.reduce(
+    (total, tab) =>
+      total +
+      tab.categories.reduce((categoryTotal, category) => categoryTotal + category.items.length, 0),
+    0
+  );
+}
+
+function mergeCandidateMenus(menus: MenuTab[][]) {
+  const tabMap = new Map<string, MenuTab>();
+
+  for (const tabs of menus) {
+    for (const tab of tabs) {
+      const tabKey = tab.name.toLowerCase();
+      const existingTab = tabMap.get(tabKey) || {
+        id: tab.id,
+        name: tab.name,
+        categories: [],
+      };
+
+      const categoryMap = new Map(
+        existingTab.categories.map((category) => [category.name.toLowerCase(), category] as const)
+      );
+
+      for (const category of tab.categories) {
+        const categoryKey = category.name.toLowerCase();
+        const existingCategory = categoryMap.get(categoryKey) || {
+          id: category.id,
+          name: category.name,
+          items: [],
+        };
+
+        const itemMap = new Map(
+          existingCategory.items.map((item) => [item.name.toLowerCase(), item] as const)
+        );
+
+        for (const item of category.items) {
+          const itemKey = item.name.toLowerCase();
+          if (!itemMap.has(itemKey)) {
+            itemMap.set(itemKey, item);
+          } else {
+            const existingItem = itemMap.get(itemKey)!;
+            if (!existingItem.description && item.description) {
+              existingItem.description = item.description;
+            }
+            if (!existingItem.image && item.image) {
+              existingItem.image = item.image;
+            }
+          }
+        }
+
+        existingCategory.items = [...itemMap.values()].slice(0, 18);
+        categoryMap.set(categoryKey, existingCategory);
+      }
+
+      existingTab.categories = [...categoryMap.values()]
+        .filter((category) => category.items.length > 0)
+        .slice(0, 8);
+      tabMap.set(tabKey, existingTab);
+    }
+  }
+
+  return [...tabMap.values()].filter((tab) => tab.categories.length > 0).slice(0, 6);
+}
+
+function getCuratedDishImage(
+  itemName: string,
+  categoryName?: string,
+  tabName?: string,
+  cuisine?: string
+) {
+  const haystack = `${itemName} ${categoryName || ""} ${tabName || ""} ${cuisine || ""}`.toLowerCase();
+  const match = CURATED_DISH_IMAGE_MATCHERS.find(({ keywords }) =>
+    keywords.some((keyword) => haystack.includes(keyword))
+  );
+
+  return match ? { src: match.src, alt: match.alt } : null;
+}
+
+function resolveMenuImage(
+  itemName: string,
+  categoryName: string,
+  tabName: string,
+  facts: SourceFacts,
+  cuisine?: string
+) {
+  const dishTokens = uniqueTokens(itemName, categoryName, tabName, cuisine);
+  let bestImage: SourceImageOption | null = null;
+  let bestScore = 0;
+
+  for (const image of facts.candidateImages) {
+    const imageTokens = uniqueTokens(image.alt, image.pageUrl);
+    const overlap = dishTokens.filter((token) => imageTokens.includes(token));
+    let score = overlap.length * 4;
+
+    if (image.alt) {
+      const altLower = image.alt.toLowerCase();
+      if (altLower.includes(itemName.toLowerCase())) score += 8;
+      if (altLower.includes(categoryName.toLowerCase())) score += 3;
+    }
+
+    if ((image.pageUrl || "").toLowerCase().includes("gallery")) score += 1;
+    if (score > bestScore) {
+      bestScore = score;
+      bestImage = image;
+    }
+  }
+
+  if (bestImage && bestScore >= 4) {
+    return {
+      src: bestImage.src,
+      alt: bestImage.alt || itemName,
+    };
+  }
+
+  return getCuratedDishImage(itemName, categoryName, tabName, cuisine);
+}
+
+function applyMenuImages(menu: MenuTab[], facts: SourceFacts, cuisine?: string) {
+  return menu.map((tab) => ({
+    ...tab,
+    categories: tab.categories.map((category) => ({
+      ...category,
+      items: category.items.map((item) => {
+        if (item.image) return item;
+
+        const resolved = resolveMenuImage(
+          item.name,
+          category.name,
+          tab.name,
+          facts,
+          cuisine
+        );
+
+        return resolved
+          ? {
+              ...item,
+              image: resolved.src,
+            }
+          : item;
+      }),
+    })),
+  }));
+}
+
+function buildMenuFromFacts(facts: SourceFacts, cuisine?: string) {
+  return applyMenuImages(facts.candidateMenu, facts, cuisine);
+}
+
+function mergeMenus(primary: MenuTab[], secondary: MenuTab[]) {
+  return mergeCandidateMenus([primary, secondary]);
 }
 
 async function crawlSourceFacts(url: URL): Promise<SourceFacts> {
@@ -707,6 +1183,9 @@ async function crawlSourceFacts(url: URL): Promise<SourceFacts> {
   const candidateImages = dedupeImages(
     extractedPages.flatMap((entry) => entry.page.images)
   );
+  const candidateMenu = mergeCandidateMenus(
+    extractedPages.map((entry) => entry.candidateMenu)
+  );
 
   return {
     sourceUrl: finalUrl.toString(),
@@ -731,6 +1210,7 @@ async function crawlSourceFacts(url: URL): Promise<SourceFacts> {
     candidatePriceRange:
       extractedPages.find((entry) => entry.candidatePriceRange)
         ?.candidatePriceRange,
+    candidateMenu,
     candidateImages,
     candidateLinks,
   };
@@ -895,8 +1375,12 @@ function defaultSections(
   return sections;
 }
 
-function normalizeMenu(menu: z.infer<typeof menuTabSchema>[]) {
-  return menu
+function normalizeMenu(
+  menu: z.infer<typeof menuTabSchema>[],
+  facts: SourceFacts,
+  cuisine?: string
+) {
+  const normalized = menu
     .map((tab, tabIndex) => ({
       id: tab.id || `tab-${sanitizeId(tab.name, String(tabIndex + 1))}`,
       name: tab.name,
@@ -922,6 +1406,8 @@ function normalizeMenu(menu: z.infer<typeof menuTabSchema>[]) {
         .filter((category) => category.items.length > 0),
     }))
     .filter((tab) => tab.categories.length > 0) satisfies MenuTab[];
+
+  return applyMenuImages(normalized, facts, cuisine);
 }
 
 function normalizeDeliveryLinks(
@@ -1117,10 +1603,11 @@ function buildFallbackSnapshot(
     hostname,
     pages: [],
     candidateHours: [],
+    candidateMenu: [],
     candidateImages: [],
     candidateLinks: [],
   });
-  const menu: MenuTab[] = [];
+  const menu = facts ? buildMenuFromFacts(facts, info.cuisine) : [];
   const capabilities = deriveCapabilities(info, menu, deliveryLinks);
 
   return {
@@ -1142,6 +1629,7 @@ function buildFallbackSnapshot(
       hostname,
       pages: [],
       candidateHours: [],
+      candidateMenu: [],
       candidateImages: [],
       candidateLinks: [],
     }, info.heroImage),
@@ -1170,7 +1658,7 @@ async function generateSnapshotWithAi(
       {
         role: "system",
         content:
-          "You are a restaurant website transformation assistant. Return strict JSON only. Use facts only from the provided extracted website data. If information is missing, omit it. Do not invent menu items, business details, reviews, or links. Choose image URLs only from candidateImages. Choose delivery/reservation/order URLs only from candidateLinks. Recommend exactly one preset theme ID from terracotta-sunset, olive-linen, coastal-citrus. Keep the summary concise and premium. Write exactly three short improvements. Build the transformed page as a bounded section schema only.",
+          "You are a restaurant website transformation assistant. Return strict JSON only. Use facts only from the provided extracted website data. If information is missing, omit it. Do not invent menu items, business details, reviews, or links. Prefer extractedFacts.candidateMenu as the source of truth for tabs, categories, items, prices, and descriptions whenever it is present. Choose image URLs only from candidateImages. Choose delivery/reservation/order URLs only from candidateLinks. Recommend exactly one preset theme ID from terracotta-sunset, olive-linen, coastal-citrus. Keep the summary concise and premium. Write exactly three short improvements. Build the transformed page as a bounded section schema only.",
       },
       {
         role: "user",
@@ -1215,6 +1703,8 @@ async function generateSnapshotWithAi(
                 ],
               },
             ],
+            menuGuidance:
+              "If extractedFacts.candidateMenu is populated, preserve that menu structure and only lightly clean labels or fill missing images from candidateImages.",
             galleryImages: [
               { src: "url from candidateImages only", alt: "string" },
             ],
@@ -1267,7 +1757,14 @@ async function generateSnapshotWithAi(
     priceRange: draft.info.priceRange || facts.candidatePriceRange,
   };
 
-  const menu = normalizeMenu(draft.menu);
+  const extractedMenu = buildMenuFromFacts(facts, info.cuisine);
+  const aiMenu = normalizeMenu(draft.menu, facts, info.cuisine);
+  const menu =
+    countMenuItems(extractedMenu) === 0
+      ? aiMenu
+      : countMenuItems(aiMenu) === 0
+        ? extractedMenu
+        : applyMenuImages(mergeMenus(aiMenu, extractedMenu), facts, info.cuisine);
   const deliveryLinks = normalizeDeliveryLinks(draft.deliveryLinks, facts);
   const capabilities = deriveCapabilities(info, menu, deliveryLinks);
   const galleryImages = normalizeGalleryImages(

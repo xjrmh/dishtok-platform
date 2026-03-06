@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, startTransition, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -19,7 +19,12 @@ import { Button } from "@/components/ui/button";
 import { OriginalSiteFrame } from "@/components/demo/OriginalSiteFrame";
 import { TransformedPreview } from "@/components/demo/TransformedPreview";
 import { BeforeAfterSlider } from "@/components/demo/BeforeAfterSlider";
-import { buildFallbackTransform, getDemoTransform } from "@/lib/transform";
+import {
+  buildFallbackSnapshot,
+  buildFallbackTransform,
+  getDemoTransform,
+  normalizeWebsiteUrl,
+} from "@/lib/transform";
 import {
   DEFAULT_THEME_PRESET_ID,
   THEME_PRESETS,
@@ -85,8 +90,11 @@ function getDisplayHostname(url: string) {
 function DemoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const url = searchParams.get("url") || "demo";
-  const [viewMode, setViewMode] = useState<ViewMode>("side-by-side");
+  const rawUrl = searchParams.get("url") || "demo";
+  const url = normalizeWebsiteUrl(rawUrl);
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    url === "demo" ? "side-by-side" : "transformed"
+  );
   const [transform, setTransform] = useState<TransformResponse | null>(null);
   const [generatedSnapshot, setGeneratedSnapshot] =
     useState<AiRestaurantSnapshot | null>(null);
@@ -100,18 +108,30 @@ function DemoContent() {
     let cancelled = false;
 
     async function loadTransform() {
-      setLoading(true);
-      setFallbackNote(null);
+      startTransition(() => {
+        setLoading(true);
+        setFallbackNote(null);
+      });
 
       if (url === "demo") {
         const demoTransform = getDemoTransform();
         if (!cancelled) {
-          setTransform(demoTransform);
-          setGeneratedSnapshot(null);
-          setSelectedThemeId(demoTransform.recommendedThemeId);
-          setLoading(false);
+          startTransition(() => {
+            setTransform(demoTransform);
+            setGeneratedSnapshot(null);
+            setSelectedThemeId(demoTransform.recommendedThemeId);
+            setLoading(false);
+          });
         }
         return;
+      }
+
+      if (!cancelled) {
+        startTransition(() => {
+          setTransform(null);
+          setGeneratedSnapshot(null);
+          setSelectedThemeId(DEFAULT_THEME_PRESET_ID);
+        });
       }
 
       try {
@@ -128,30 +148,36 @@ function DemoContent() {
 
         if (cancelled) return;
 
-        setTransform(data);
-        setGeneratedSnapshot(data.snapshot ?? null);
-        setSelectedThemeId(
-          isThemePresetId(data.recommendedThemeId)
-            ? data.recommendedThemeId
-            : DEFAULT_THEME_PRESET_ID
-        );
-        setFallbackNote(
-          data.fallbackUsed
-            ? "Live metadata was limited, so DishTok used a reliable template brief instead."
-            : null
-        );
+        startTransition(() => {
+          setTransform(data);
+          setGeneratedSnapshot(data.snapshot ?? null);
+          setSelectedThemeId(
+            isThemePresetId(data.recommendedThemeId)
+              ? data.recommendedThemeId
+              : DEFAULT_THEME_PRESET_ID
+          );
+          setFallbackNote(
+            data.fallbackUsed
+              ? "Live metadata was limited, so DishTok used a reliable template brief instead."
+              : null
+          );
+        });
       } catch {
         if (cancelled) return;
         const fallback = buildFallbackTransform(url);
-        setTransform(fallback);
-        setGeneratedSnapshot(null);
-        setSelectedThemeId(fallback.recommendedThemeId);
-        setFallbackNote(
-          "ChatGPT could not reach the site cleanly, so DishTok fell back to a curated template brief."
-        );
+        startTransition(() => {
+          setTransform(fallback);
+          setGeneratedSnapshot(buildFallbackSnapshot(url));
+          setSelectedThemeId(fallback.recommendedThemeId);
+          setFallbackNote(
+            "ChatGPT could not reach the site cleanly, so DishTok fell back to a curated template brief."
+          );
+        });
       } finally {
         if (!cancelled) {
-          setLoading(false);
+          startTransition(() => {
+            setLoading(false);
+          });
         }
       }
     }
@@ -169,12 +195,17 @@ function DemoContent() {
     };
   }, [selectedThemeId]);
 
+  useEffect(() => {
+    setViewMode(url === "demo" ? "side-by-side" : "transformed");
+  }, [url]);
+
   const fullExperienceHref =
     url === "demo"
       ? `/demo/son-cubano?theme=${selectedThemeId}`
-      : generatedSnapshot
-        ? `/demo/${generatedSnapshot.slug}?theme=${selectedThemeId}`
+      : transform?.slug
+        ? `/demo/${transform.slug}?theme=${selectedThemeId}`
         : null;
+  const showGeneratedBuildState = url !== "demo" && loading && !generatedSnapshot;
 
   return (
     <div
@@ -259,7 +290,10 @@ function DemoContent() {
                 <BeforeAfterSlider
                   beforeContent={
                     <div className="h-full w-full">
-                      <OriginalSiteFrame url={url} />
+                      <OriginalSiteFrame
+                        url={url}
+                        snapshot={generatedSnapshot ?? undefined}
+                      />
                     </div>
                   }
                   afterContent={
@@ -267,6 +301,8 @@ function DemoContent() {
                       <TransformedPreview
                         themeId={selectedThemeId}
                         snapshot={generatedSnapshot ?? undefined}
+                        isBuilding={showGeneratedBuildState}
+                        sourceUrl={url}
                       />
                     </div>
                   }
@@ -276,7 +312,10 @@ function DemoContent() {
 
             {viewMode === "original" && (
               <div className="h-[calc(100vh-340px)] min-h-[36rem] overflow-hidden rounded-[2rem] border border-theme-border bg-white shadow-lg">
-                <OriginalSiteFrame url={url} />
+                <OriginalSiteFrame
+                  url={url}
+                  snapshot={generatedSnapshot ?? undefined}
+                />
               </div>
             )}
 
@@ -285,6 +324,8 @@ function DemoContent() {
                 <TransformedPreview
                   themeId={selectedThemeId}
                   snapshot={generatedSnapshot ?? undefined}
+                  isBuilding={showGeneratedBuildState}
+                  sourceUrl={url}
                 />
               </div>
             )}
