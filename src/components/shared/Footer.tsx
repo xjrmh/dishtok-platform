@@ -75,7 +75,7 @@ export function Footer() {
             </div>
             <div>
               <p className="text-sm font-semibold text-white">Li Zheng</p>
-              <p className="text-xs text-white/60">Co-founder</p>
+              <p className="text-xs text-white/60">Developer</p>
             </div>
           </a>
         </div>
