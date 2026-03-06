@@ -1,0 +1,97 @@
+<svg width="960" height="1280" viewBox="0 0 960 1280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hero" x1="120" y1="112" x2="828" y2="428" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#512E25"/>
+      <stop offset="0.55" stop-color="#A24F35"/>
+      <stop offset="1" stop-color="#D49A49"/>
+    </linearGradient>
+    <linearGradient id="card" x1="120" y1="692" x2="838" y2="1218" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF8EF"/>
+      <stop offset="1" stop-color="#F6EADC"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="960" height="1280" rx="44" fill="#F5EBDD"/>
+  <rect x="52" y="48" width="856" height="1184" rx="34" fill="url(#card)" stroke="#D9C3AF" stroke-width="4"/>
+
+  <rect x="104" y="104" width="752" height="344" rx="28" fill="url(#hero)"/>
+  <circle cx="744" cy="198" r="140" fill="#F0B56A" fill-opacity="0.22"/>
+  <circle cx="804" cy="150" r="84" fill="#FFF1D8" fill-opacity="0.18"/>
+  <rect x="140" y="144" width="188" height="38" rx="19" fill="#FFF3E0" fill-opacity="0.18"/>
+  <text x="172" y="169" fill="#FFF8EF" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" letter-spacing="2">DISHTOK TEMPLATE</text>
+  <text x="140" y="252" fill="#FFF8EF" font-family="Georgia, 'Times New Roman', serif" font-size="62" font-weight="700">SON CUBANO</text>
+  <text x="140" y="300" fill="#F9EBDD" font-family="Arial, Helvetica, sans-serif" font-size="22">Editorial visuals, faster ordering, and a cleaner reservation path.</text>
+  <text x="140" y="356" fill="#F5DAB3" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">4.7  •  Cuban / Latin  •  $$</text>
+
+  <rect x="104" y="476" width="752" height="94" rx="26" fill="#FFF7EE" stroke="#E0D1C0" stroke-width="3"/>
+  <text x="140" y="516" fill="#8A7565" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="2">SIGNATURE COLLECTIONS</text>
+  <rect x="694" y="494" width="126" height="38" rx="19" fill="#9C4F36"/>
+  <text x="757" y="519" text-anchor="middle" fill="#FFF8EF" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">ORDER-READY</text>
+  <rect x="140" y="532" width="92" height="26" rx="13" fill="#9C4F36"/>
+  <rect x="244" y="532" width="82" height="26" rx="13" fill="#EADFD2"/>
+  <rect x="338" y="532" width="94" height="26" rx="13" fill="#EADFD2"/>
+  <text x="186" y="549" text-anchor="middle" fill="#FFF8EF" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">DINNER</text>
+  <text x="285" y="549" text-anchor="middle" fill="#7C6A5E" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">BRUNCH</text>
+  <text x="385" y="549" text-anchor="middle" fill="#7C6A5E" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">COCKTAILS</text>
+
+  <rect x="104" y="610" width="752" height="300" rx="30" fill="#FFF8EF" stroke="#E1D2C1" stroke-width="3"/>
+  <text x="140" y="654" fill="#8A7565" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="2">FEATURED NOW</text>
+  <text x="140" y="690" fill="#352721" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Appetizers</text>
+  <rect x="664" y="646" width="156" height="34" rx="17" fill="#E7B45E" fill-opacity="0.28"/>
+  <text x="742" y="668" text-anchor="middle" fill="#8B5B1F" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">CHEF SELECTED</text>
+
+  <g>
+    <rect x="140" y="724" width="160" height="146" rx="22" fill="#F6E6D6"/>
+    <rect x="140" y="724" width="160" height="92" rx="22" fill="#D9A370"/>
+    <rect x="154" y="738" width="132" height="64" rx="16" fill="#E8C49B"/>
+    <text x="154" y="842" fill="#352721" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">Crab Croquettes</text>
+    <text x="154" y="865" fill="#9C4F36" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">$20</text>
+    <circle cx="274" cy="857" r="16" fill="#9C4F36"/>
+    <text x="274" y="863" text-anchor="middle" fill="#FFF8EF" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">+</text>
+  </g>
+  <g>
+    <rect x="316" y="724" width="160" height="146" rx="22" fill="#F6E6D6"/>
+    <rect x="316" y="724" width="160" height="92" rx="22" fill="#C6694A"/>
+    <rect x="330" y="738" width="132" height="64" rx="16" fill="#E89B7E"/>
+    <text x="330" y="842" fill="#352721" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">Empanadas Mixtas</text>
+    <text x="330" y="865" fill="#9C4F36" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">$18</text>
+    <circle cx="450" cy="857" r="16" fill="#9C4F36"/>
+    <text x="450" y="863" text-anchor="middle" fill="#FFF8EF" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">+</text>
+  </g>
+  <g>
+    <rect x="492" y="724" width="160" height="146" rx="22" fill="#F6E6D6"/>
+    <rect x="492" y="724" width="160" height="92" rx="22" fill="#68856A"/>
+    <rect x="506" y="738" width="132" height="64" rx="16" fill="#9FB79D"/>
+    <text x="506" y="842" fill="#352721" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">Guacamole</text>
+    <text x="506" y="865" fill="#9C4F36" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">$16</text>
+    <circle cx="626" cy="857" r="16" fill="#9C4F36"/>
+    <text x="626" y="863" text-anchor="middle" fill="#FFF8EF" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">+</text>
+  </g>
+  <g>
+    <rect x="668" y="724" width="152" height="146" rx="22" fill="#F6E6D6"/>
+    <rect x="668" y="724" width="152" height="92" rx="22" fill="#AB7D4A"/>
+    <rect x="682" y="738" width="124" height="64" rx="16" fill="#DAB385"/>
+    <text x="682" y="842" fill="#352721" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">Lobster Tacos</text>
+    <text x="682" y="865" fill="#9C4F36" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">$28</text>
+    <circle cx="794" cy="857" r="16" fill="#9C4F36"/>
+    <text x="794" y="863" text-anchor="middle" fill="#FFF8EF" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">+</text>
+  </g>
+
+  <rect x="104" y="938" width="420" height="214" rx="28" fill="#7C4A3D"/>
+  <circle cx="420" cy="1020" r="88" fill="#E0AE6D" fill-opacity="0.22"/>
+  <text x="140" y="1002" fill="#F1E2D4" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="2">AMBIENCE</text>
+  <text x="140" y="1050" fill="#FFF8EF" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="700">Richer storytelling</text>
+  <text x="140" y="1092" fill="#F7E6D5" font-family="Arial, Helvetica, sans-serif" font-size="22">Editorial photo moments make the dining room feel alive.</text>
+
+  <rect x="548" y="938" width="308" height="214" rx="28" fill="#FFF8EF" stroke="#E1D2C1" stroke-width="3"/>
+  <text x="584" y="980" fill="#8A7565" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="2">FASTER ACTIONS</text>
+  <rect x="584" y="1008" width="236" height="42" rx="18" fill="#F6EBDD"/>
+  <rect x="584" y="1064" width="236" height="42" rx="18" fill="#F6EBDD"/>
+  <rect x="584" y="1120" width="236" height="42" rx="18" fill="#F6EBDD"/>
+  <text x="606" y="1035" fill="#352721" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Reserve a table</text>
+  <text x="606" y="1091" fill="#352721" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Start pickup order</text>
+  <text x="606" y="1147" fill="#352721" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Browse cocktails</text>
+  <text x="796" y="1035" text-anchor="end" fill="#9C4F36" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">→</text>
+  <text x="796" y="1091" text-anchor="end" fill="#9C4F36" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">→</text>
+  <text x="796" y="1147" text-anchor="end" fill="#9C4F36" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">→</text>
+</svg>

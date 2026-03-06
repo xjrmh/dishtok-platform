@@ -1,0 +1,64 @@
+<svg width="960" height="1280" viewBox="0 0 960 1280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="1280" rx="44" fill="#F5F2ED"/>
+  <rect x="52" y="48" width="856" height="1184" rx="34" fill="#FFFFFF" stroke="#D6D0C8" stroke-width="4"/>
+  <rect x="52" y="48" width="856" height="120" rx="34" fill="#2B2725"/>
+  <rect x="52" y="130" width="856" height="38" fill="#2B2725"/>
+  <text x="480" y="103" text-anchor="middle" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" letter-spacing="10">SON CUBANO</text>
+  <text x="480" y="144" text-anchor="middle" fill="#BDB6AE" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="5">HOME   MENU   ABOUT   CONTACT</text>
+  <rect x="104" y="210" width="752" height="58" rx="8" fill="#F4F2EE"/>
+  <text x="122" y="247" fill="#5C5550" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">DINNER MENU</text>
+  <rect x="104" y="280" width="752" height="2" fill="#D7D1C8"/>
+  <text x="104" y="340" fill="#7E756C" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" letter-spacing="3">APPETIZERS</text>
+
+  <g fill="#5B5550" font-family="Arial, Helvetica, sans-serif" font-size="22">
+    <text x="104" y="394">Butternut Squash Soup</text>
+    <text x="790" y="394" text-anchor="end">$14.00</text>
+    <text x="104" y="448">Crab Croquettes</text>
+    <text x="790" y="448" text-anchor="end">$20.00</text>
+    <text x="104" y="502">Empanadas Mixtas</text>
+    <text x="790" y="502" text-anchor="end">$18.00</text>
+    <text x="104" y="556">Guacamole</text>
+    <text x="790" y="556" text-anchor="end">$16.00</text>
+    <text x="104" y="610">Spicy Ceviche Mixto</text>
+    <text x="790" y="610" text-anchor="end">$20.00</text>
+    <text x="104" y="664">Lobster and Shrimp Tacos</text>
+    <text x="790" y="664" text-anchor="end">$28.00</text>
+    <text x="104" y="718">Clothesline Bacon</text>
+    <text x="790" y="718" text-anchor="end">$22.00</text>
+  </g>
+
+  <g stroke="#E6E1DA" stroke-width="2" stroke-dasharray="6 6">
+    <line x1="104" y1="408" x2="790" y2="408"/>
+    <line x1="104" y1="462" x2="790" y2="462"/>
+    <line x1="104" y1="516" x2="790" y2="516"/>
+    <line x1="104" y1="570" x2="790" y2="570"/>
+    <line x1="104" y1="624" x2="790" y2="624"/>
+    <line x1="104" y1="678" x2="790" y2="678"/>
+    <line x1="104" y1="732" x2="790" y2="732"/>
+  </g>
+
+  <text x="104" y="812" fill="#7E756C" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" letter-spacing="3">ENTREES</text>
+  <g fill="#5B5550" font-family="Arial, Helvetica, sans-serif" font-size="22">
+    <text x="104" y="866">Ropa Vieja</text>
+    <text x="790" y="866" text-anchor="end">$38.00</text>
+    <text x="104" y="920">Skirt Steak Churrasco</text>
+    <text x="790" y="920" text-anchor="end">$49.00</text>
+    <text x="104" y="974">BBQ Glazed Salmon</text>
+    <text x="790" y="974" text-anchor="end">$30.00</text>
+    <text x="104" y="1028">Roasted Chicken</text>
+    <text x="790" y="1028" text-anchor="end">$31.00</text>
+    <text x="104" y="1082">Crackling Pork Shank</text>
+    <text x="790" y="1082" text-anchor="end">$37.00</text>
+  </g>
+
+  <g stroke="#E6E1DA" stroke-width="2" stroke-dasharray="6 6">
+    <line x1="104" y1="880" x2="790" y2="880"/>
+    <line x1="104" y1="934" x2="790" y2="934"/>
+    <line x1="104" y1="988" x2="790" y2="988"/>
+    <line x1="104" y1="1042" x2="790" y2="1042"/>
+    <line x1="104" y1="1096" x2="790" y2="1096"/>
+  </g>
+
+  <rect x="104" y="1140" width="752" height="42" rx="10" fill="#F6F3EF"/>
+  <text x="480" y="1168" text-anchor="middle" fill="#9E968E" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="3">STATIC MENU PAGE • LITTLE STORYTELLING • LOW-CONTRAST CONVERSION PATH</text>
+</svg>
