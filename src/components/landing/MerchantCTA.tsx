@@ -67,9 +67,9 @@ export function MerchantCTA() {
               />
               <Button
                 type="submit"
-                className="w-full rounded-xl bg-theme-accent px-6 py-3.5 font-semibold text-theme-accent-foreground hover:bg-theme-accent/90 sm:w-auto"
+                className="h-[54px] w-full rounded-xl bg-theme-accent px-6 font-semibold text-theme-accent-foreground hover:bg-theme-accent/90 sm:w-auto"
               >
-                Sign Up
+                Submit
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </form>
